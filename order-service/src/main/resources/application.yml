@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: order-service
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+#kafka:
+#  topics:
+#    order: order-notifications
+
+
