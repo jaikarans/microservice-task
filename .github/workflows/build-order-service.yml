@@ -20,7 +20,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-order-service:
 
     runs-on: ubuntu-latest
 

@@ -7,12 +7,12 @@ on:
       - completed
 
 jobs:
-  deploy:
+  deploy-order-service:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: ssh to order-service EC2 instance and depoly order-service
+      - name: ssh to order-service EC2 instance and deploy order-service
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_ORDER_SERVICE_HOST }}
@@ -26,8 +26,9 @@ jobs:
             echo -e "\e[32mStarting Docker demon service...\e[0m"
             sudo systemctl start docker
             sudo systemctl enable docker
+            sudo systemctl status docker
             
-            echo -e "\e[32mResolve docker binary permission...\e[0m"
+            echo -e "\e[32mResolve docker binary permission for user: $USER\e[0m"
             sudo usermod -aG docker $USER
             newgrp docker
             docker ps
