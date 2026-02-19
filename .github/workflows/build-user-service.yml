@@ -63,6 +63,6 @@ jobs:
       with:
        context: user-service
        push: true
-       tags: jaikrn/app:latest
+       tags: ${{ secrets.DOCKER_USERNAME }}/user-service:latest
 
 
