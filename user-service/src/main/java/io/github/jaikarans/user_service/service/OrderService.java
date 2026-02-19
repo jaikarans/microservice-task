@@ -31,6 +31,8 @@ public class OrderService {
                 request.orderItem()
         );
 
+        System.out.println("orderServiceUrl: "+orderServiceUrl);
+
         return restTemplate.postForEntity(orderServiceUrl+"/api/place-order", requestBody, PlaceOrderResponse.class).getBody();
 
     }
