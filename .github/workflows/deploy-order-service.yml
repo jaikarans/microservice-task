@@ -1,4 +1,4 @@
-name: Deploy user-service to EC2
+name: Deploy order-service to EC2
 
 on:
   workflow_run:
