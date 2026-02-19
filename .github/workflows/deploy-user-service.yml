@@ -5,6 +5,10 @@ on:
     workflows: ["build, test and push to docker user-service"]
     types:
       - completed
+  push:
+    branches: [ "main" ]
+    paths:
+      - ".github/workflows/deploy-user-service.yml"
 
 jobs:
   deploy:
@@ -12,23 +16,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy on EC2
+      - name: ssh to order-service EC2 instance and depoly user-service
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          host: ${{ secrets.EC2_USER_SERVICE_HOST }}
+          username: ${{ secrets.EC2_USER_SERVICE_USER }}
+          key: ${{ secrets.EC2_USER_SERVICE_SSH_KEY }}
           script: |
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-            docker pull jaikrn/jaikaran:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/user-service:latest
 
-            docker stop app || true
-            docker rm app || true
+            docker stop user-service || true
+            docker rm user-service || true
 
             docker run -d \
-              --name app \
+              --name user-service \
               --restart always \
               -p 80:8080 \
-              jaikrn/jaikaran:latest
+              ${{ secrets.DOCKER_USERNAME }}/user-service:latest
 
