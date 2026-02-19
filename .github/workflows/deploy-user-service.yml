@@ -19,27 +19,33 @@ jobs:
           username: ${{ secrets.EC2_USER_SERVICE_USER }}
           key: ${{ secrets.EC2_USER_SERVICE_SSH_KEY }}
           script: |
-            echo -e \e[32mInstalling the Docker to EC2...\e[0m
+            echo -e "\e[32mInstalling the Docker to EC2...\e[0m"
             sudo apt update
             sudo apt install docker.io -y
             
-            echo -e "\e[32mStarting Docker...\e[0m"
+            echo -e "\e[32mStarting Docker demon service...\e[0m"
             sudo systemctl start docker
             sudo systemctl enable docker
-  
-  
-            echo -e \e[32mLogin to the Docker Hub...\e[0m
-            sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             
-            echo -e \e[32mDownloading the user-service image from DockerHub...\e[0m
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/user-service:latest
+            echo -e "\e[32mResolve docker binary permission...\e[0m"
+            sudo usermod -aG docker $USER
+            newgrp docker
+            docker ps
             
-            echo -e \e[32mStoping and Removing previous Image...\e[0m
-            sudo docker stop user-service || true
-            sudo docker rm user-service || true
             
-            echo -e \e[32mRunning the user-service...\e[0m
-            sudo docker run -d \
+            
+            echo -e "\e[32mLogin to the Docker Hub...\e[0m"
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+            
+            echo -e "\e[32mDownloading the user-service image from DockerHub...\e[0m"
+            docker pull ${{ secrets.DOCKER_USERNAME }}/user-service:latest
+            
+            echo -e "\e[32mStoping and Removing previous Image...\e[0m"
+            docker stop user-service || true
+            docker rm user-service || true
+            
+            echo -e "\e[32mRunning the user-service...\e[0m"
+            docker run -d \
               --name user-service \
               --restart always \
               -p 80:8080 \
