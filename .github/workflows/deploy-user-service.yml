@@ -48,6 +48,7 @@ jobs:
             echo -e "\e[32mRDS user-db values are exporting to user-service\e[0m"
             
             echo -e "\e[32mRunning the user-service...\e[0m"
+            echo -e "\e[32mSetting ORDER_SERVICE_URL to ${{ secrets.ORDER_SERVICE_URL }} \e[0m"
             docker run -d \
               -e SPRING_DATASOURCE_URL=${{ secrets.USER_DB_URL }} \
               -e SPRING_DATASOURCE_USERNAME=${{ secrets.USER_DB_USERNAME }} \
