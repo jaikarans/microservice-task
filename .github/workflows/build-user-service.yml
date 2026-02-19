@@ -14,6 +14,7 @@ on:
     paths:
       - "user-service/**"
       - ".github/workflows/build-user-service.yml"
+      - ".github/workflows/deploy-user-service.yml"
 
 permissions:
   contents: write
