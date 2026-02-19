@@ -42,7 +42,7 @@ jobs:
       uses: advanced-security/maven-dependency-submission-action@v5
       with:
         directory: user-service
-        maven-wrapper-filepath: user-service/mvnw
+        ignore-maven-wrapper: true
     - name: build docker image and push it to docker hub
       uses: mr-smithers-excellent/docker-build-push@v6
       with:
