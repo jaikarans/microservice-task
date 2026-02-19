@@ -19,21 +19,21 @@ jobs:
           username: ${{ secrets.EC2_USER_SERVICE_USER }}
           key: ${{ secrets.EC2_USER_SERVICE_SSH_KEY }}
           script: |
-            echo Installing the Docker to EC2...
+            echo -e \e[32mInstalling the Docker to EC2...\e[0m
             sudo apt update
-            sudo apt install docker -y
+            sudo apt install docker.io -y
             
-            echo Login to the Docker Hub...
+            echo -e \e[32mLogin to the Docker Hub...\e[0m
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             
-            echo Downloading the user-service image from DockerHub...
+            echo -e \e[32mDownloading the user-service image from DockerHub...\e[0m
             docker pull ${{ secrets.DOCKER_USERNAME }}/user-service:latest
             
-            echo Stoping and Removing previous Image...
+            echo -e \e[32mStoping and Removing previous Image...\e[0m
             docker stop user-service || true
             docker rm user-service || true
             
-            echo Running the user-service...
+            echo -e \e[32mRunning the user-service...\e[0m
             docker run -d \
               --name user-service \
               --restart always \
