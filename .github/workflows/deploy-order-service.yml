@@ -2,7 +2,7 @@ name: Deploy user-service to EC2
 
 on:
   workflow_run:
-    workflows: ["build, test and push to docker user-service"]
+    workflows: ["build, test and push to docker order-service"]
     types:
       - completed
 
@@ -12,12 +12,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ssh to user-service EC2 instance and depoly user-service
+      - name: ssh to order-service EC2 instance and depoly order-service
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_USER_SERVICE_HOST }}
-          username: ${{ secrets.EC2_USER_SERVICE_USER }}
-          key: ${{ secrets.EC2_USER_SERVICE_SSH_KEY }}
+          host: ${{ secrets.EC2_ORDER_SERVICE_HOST }}
+          username: ${{ secrets.EC2_ORDER_SERVICE_USER }}
+          key: ${{ secrets.EC2_ORDER_SERVICE_SSH_KEY }}
           script: |
             echo -e "\e[32mInstalling the Docker to EC2...\e[0m"
             sudo apt update
@@ -38,22 +38,21 @@ jobs:
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             
             echo -e "\e[32mDownloading the user-service image from DockerHub...\e[0m"
-            docker pull ${{ secrets.DOCKER_USERNAME }}/user-service:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/order-service:latest
             
             echo -e "\e[32mStoping and Removing previous Image...\e[0m"
-            docker stop user-service || true
-            docker rm user-service || true
+            docker stop order-service || true
+            docker rm order-service || true
             
             echo -e "\e[32mRDS user-db values are exporting to user-service\e[0m"
             
             echo -e "\e[32mRunning the user-service...\e[0m"
             docker run -d \
-              -e SPRING_DATASOURCE_URL=${{ secrets.USER_DB_URL }} \
-              -e SPRING_DATASOURCE_USERNAME=${{ secrets.USER_DB_USERNAME }} \
-              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.USER_DB_PASSWORD }} \
-              -e ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
-              --name user-service \
+              -e SPRING_DATASOURCE_URL=${{ secrets.ORDER_DB_URL }} \
+              -e SPRING_DATASOURCE_USERNAME=${{ secrets.ORDER_DB_USERNAME }} \
+              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.ORDER_DB_PASSWORD }} \
+              --name order-service \
               --restart always \
               -p 80:8080 \
-              ${{ secrets.DOCKER_USERNAME }}/user-service:latest
+              ${{ secrets.DOCKER_USERNAME }}/order-service:latest
 
