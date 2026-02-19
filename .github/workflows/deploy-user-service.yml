@@ -55,3 +55,4 @@ jobs:
               --restart always \
               -p 80:8080 \
               ${{ secrets.DOCKER_USERNAME }}/user-service:latest
+
