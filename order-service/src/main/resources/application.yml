@@ -12,8 +12,8 @@ spring:
     hibernate:
       ddl-auto: update
 
-#kafka:
-#  topics:
-#    order: order-notifications
+kafka:
+  topics:
+    order: order-notifications
 
 

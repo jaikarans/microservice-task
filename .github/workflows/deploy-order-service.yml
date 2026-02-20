@@ -19,20 +19,26 @@ jobs:
           username: ${{ secrets.EC2_ORDER_SERVICE_USER }}
           key: ${{ secrets.EC2_ORDER_SERVICE_SSH_KEY }}
           script: |
-            echo -e "\e[32mInstalling the Docker to EC2...\e[0m"
-            sudo apt update
-            sudo apt install docker.io -y
+            #----- Install and Run Docker -----
+            if ! command -v docker &> /dev/null; then
+              echo -e "\e[32mInstalling Docker...\e[0m"
+              sudo apt-get update -y
+              sudo apt-get install -y docker.io
+              sudo systemctl enable docker
+              sudo systemctl start docker
+              sudo systemctl status docker --no-pager
+            else
+              echo -e "\e[32mDocker already installed\e[0m"
+            fi
             
-            echo -e "\e[32mStarting Docker demon service...\e[0m"
-            sudo systemctl start docker
-            sudo systemctl enable docker
-            sudo systemctl status docker
-            
-            echo -e "\e[32mResolve docker binary permission for user: $USER\e[0m"
-            sudo usermod -aG docker $USER
-            newgrp docker
-            docker ps
-            
+            #----- Prevent docker to run only with sudo -----
+            if ! id -nG "$USER" | grep -qw docker; then
+              echo -e "\e[32mAdding docker to user group\e[0m"
+              sudo usermod -aG docker $USER
+              newgrp docker
+            else
+              echo -e "\e[32mDocker is already added to user group on ec2\e[0m"
+            fi
             
             
             echo -e "\e[32mLogin to the Docker Hub...\e[0m"

@@ -1,0 +1,80 @@
+name: Configure Kafka on EC2
+
+on:
+  workflow_dispatch:
+
+jobs:
+  configure-kafka:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Start Kafka on EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.KAFKA_EC2_HOST }}
+          username: ${{ secrets.KAFKA_EC2_USER }}
+          key: ${{ secrets.KAFKA_EC2_SSH_KEY }}
+          script: |
+            # ---------- 1. Install Docker if not present ----------
+            if ! command -v docker &> /dev/null; then
+              echo "Installing Docker..."
+              sudo apt-get update -y
+              sudo apt-get install -y docker.io
+              sudo systemctl enable docker
+              sudo systemctl start docker
+            else
+              echo "Docker already installed"
+            fi
+            
+            #----- Prevent docker to run only with sudo -----
+            if ! id -nG "$USER" | grep -qw docker; then
+              echo -e "\e[32mAdding docker to user group\e[0m"
+              sudo usermod -aG docker $USER
+              newgrp docker
+            else
+              echo -e "\e[32mDocker is already added to user group on ec2\e[0m"
+            fi
+
+            # ---------- 2. Get Private IP Of EC2 since all the ec2's are in same vpc(virtual private cloud) ----------
+            # this is aws ec2 specific link only works on ec2 not in your local machine
+            echo -e "\e[32mFinding private ip of kafka ec2 to pass to kafka advertise listerns\e[0m"
+            TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" \
+              -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+
+            PRIVATE_IP=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" \
+              http://169.254.169.254/latest/meta-data/local-ipv4)
+
+            if [ -z "$PRIVATE_IP" ]; then
+              echo -e "\e[31mERROR: Could not fetch kafaka EC2 private IP. Aborting.\e[0m"
+              exit 1
+            fi
+
+            echo "Private IP: $PRIVATE_IP"
+
+            # ---------- 3. Stop existing Kafka container if running ----------
+            sudo docker stop kafka 2>/dev/null || true
+            sudo docker rm kafka 2>/dev/null || true
+
+            # ---------- 4. Run Kafka ----------
+            sudo docker run -d \
+              --name kafka \
+              --restart always \
+              -p 9092:9092 \
+              -e KAFKA_NODE_ID=1 \
+              -e KAFKA_PROCESS_ROLES=broker,controller \
+              -e KAFKA_CONTROLLER_QUORUM_VOTERS=1@localhost:9093 \
+              -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093 \
+              -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://$PRIVATE_IP:9092 \
+              -e KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT \
+              -e KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER \
+              -e KAFKA_AUTO_CREATE_TOPICS_ENABLE=true \
+              -e CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk \
+              apache/kafka:3.7.0
+
+            sleep 10
+
+            echo "Kafka container status:"
+            sudo docker ps | grep kafka
+
+            echo "Kafka logs:"
+            sudo docker logs kafka --tail 20
