@@ -58,7 +58,7 @@ jobs:
               -e SPRING_DATASOURCE_URL=${{ secrets.ORDER_DB_URL }} \
               -e SPRING_DATASOURCE_USERNAME=${{ secrets.ORDER_DB_USERNAME }} \
               -e SPRING_DATASOURCE_PASSWORD=${{ secrets.ORDER_DB_PASSWORD }} \
-              -e SPRING_KAFKA_BOOTSTRAP_SERVERS=${{ secrets.EC2_KAFKA_PRIVATE_IP }} \
+              -e SPRING_KAFKA_BOOTSTRAP_SERVERS=${{ secrets.EC2_KAFKA_PRIVATE_IP }}:9092 \
               --name order-service \
               --restart always \
               -p 80:8080 \
