@@ -7,6 +7,9 @@ import io.github.jaikarans.user_service.repository.UserRepository;
 import io.github.jaikarans.user_service.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,9 +34,18 @@ public class OrderService {
                 request.orderItem()
         );
 
-        System.out.println("orderServiceUrl: "+orderServiceUrl);
+        // Add JWT token to headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwtToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        return restTemplate.postForEntity("http://"+orderServiceUrl+"/api/place-order", requestBody, PlaceOrderResponse.class).getBody();
+        HttpEntity<PlaceOrderRequest> entity = new HttpEntity<>(requestBody, headers);
 
-    }
-}
+        System.out.println("orderServiceUrl: " + orderServiceUrl);
+
+        return restTemplate.postForEntity(
+                "http://" + orderServiceUrl + "/api/place-order",
+                entity,
+                PlaceOrderResponse.class
+        ).getBody();
+    }}
