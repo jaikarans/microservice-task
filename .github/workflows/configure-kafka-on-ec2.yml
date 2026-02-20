@@ -11,9 +11,9 @@ jobs:
       - name: Start Kafka on EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.KAFKA_EC2_HOST }}
-          username: ${{ secrets.KAFKA_EC2_USER }}
-          key: ${{ secrets.KAFKA_EC2_SSH_KEY }}
+          host: ${{ secrets.EC2_KAFKA_HOST }}
+          username: ${{ secrets.EC2_KAFKA_USER }}
+          key: ${{ secrets.EC2_KAFKA_SSH_KEY }}
           script: |
             # ---------- 1. Install Docker if not present ----------
             if ! command -v docker &> /dev/null; then
