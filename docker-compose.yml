@@ -41,7 +41,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_KAFKA_STREAMS_DEFAULT_KEY_SERDE: org.apache.kafka.common.serialization.Serdes$$StringSerde
       SPRING_KAFKA_STREAMS_DEFAULT_VALUE_SERDE: org.apache.kafka.common.serialization.Serdes$$StringSerde
-      KAFKA_TOPICS_ORDER: order-notifications
+#      KAFKA_TOPICS_ORDER: order-notifications
 
     depends_on:
       - kafka

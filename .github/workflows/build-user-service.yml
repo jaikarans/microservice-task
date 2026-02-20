@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: build, test and push to docker user-service
+name: build user-service
 
 on:
   push:

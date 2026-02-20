@@ -1,23 +1,23 @@
-name: Deploy user-service to EC2
+name: Deploy notification-service to EC2
 
 on:
   workflow_run:
-    workflows: ["build user-service"]
+    workflows: ["build notification-service"]
     types:
       - completed
 
 jobs:
-  deploy-user-service:
+  deploy-notification-service:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: ssh to user-service EC2 instance and depoly user-service
+      - name: ssh to notification-service EC2 instance and deploy notification-service
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_USER_SERVICE_HOST }}
-          username: ${{ secrets.EC2_USER_SERVICE_USER }}
-          key: ${{ secrets.EC2_USER_SERVICE_SSH_KEY }}
+          host: ${{ secrets.EC2_NOTIFICATION_SERVICE_HOST }}
+          username: ${{ secrets.EC2_NOTIFICATION_SERVICE_USER }}
+          key: ${{ secrets.EC2_NOTIFICATION_SERVICE_SSH_KEY }}
           script: |
             #----- Install and Run Docker -----
             if ! command -v docker &> /dev/null; then
@@ -45,23 +45,23 @@ jobs:
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             
             echo -e "\e[32mDownloading the user-service image from DockerHub...\e[0m"
-            docker pull ${{ secrets.DOCKER_USERNAME }}/user-service:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/notification-service:latest
             
             echo -e "\e[32mStoping and Removing previous Image...\e[0m"
-            docker stop user-service || true
-            docker rm user-service || true
+            docker stop notification-service || true
+            docker rm notification-service || true
             
             echo -e "\e[32mRDS user-db values are exporting to user-service\e[0m"
             
             echo -e "\e[32mRunning the user-service...\e[0m"
-            echo -e "\e[32mSetting ORDER_SERVICE_URL to ${{ secrets.ORDER_SERVICE_URL }} \e[0m"
             docker run -d \
-              -e SPRING_DATASOURCE_URL=${{ secrets.USER_DB_URL }} \
-              -e SPRING_DATASOURCE_USERNAME=${{ secrets.USER_DB_USERNAME }} \
-              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.USER_DB_PASSWORD }} \
-              -e ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
-              --name user-service \
+              -e SPRING_KAFKA_BOOTSTRAP_SERVERS=${{ secrets.EC2_KAFKA_PRIVATE_IP }}:9092 \
+              -e 'SPRING_KAFKA_STREAMS_DEFAULT_KEY_SERDE=org.apache.kafka.common.serialization.Serdes$$StringSerde' \
+              -e 'SPRING_KAFKA_STREAMS_DEFAULT_VALUE_SERDE=org.apache.kafka.common.serialization.Serdes$$StringSerde' \
+              -e "MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}" \
+              -e "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" \
+              --name notification-service \
               --restart always \
               -p 80:8080 \
-              ${{ secrets.DOCKER_USERNAME }}/user-service:latest
+              ${{ secrets.DOCKER_USERNAME }}/notification-service:latest
 

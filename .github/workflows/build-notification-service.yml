@@ -6,21 +6,21 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: build order-service
+name: build notification-service
 
 on:
   push:
     branches: [ "main" ]
     paths:
-      - "order-service/**"
-      - ".github/workflows/build-order-service.yml"
-      - ".github/workflows/deploy-order-service.yml"
+      - "notification-service/**"
+      - ".github/workflows/build-notification-service.yml"
+      - ".github/workflows/deploy-notification-service.yml"
 
 permissions:
   contents: write
 
 jobs:
-  build-order-service:
+  build-notification-service:
 
     runs-on: ubuntu-latest
 
@@ -35,14 +35,14 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Build with Maven
-        working-directory: order-service
+        working-directory: notification-service
         run: mvn -B package
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph
         uses: advanced-security/maven-dependency-submission-action@v5
         with:
-          directory: order-service
+          directory: notification-service
           ignore-maven-wrapper: true
 
       - name: login to Docker Hub
@@ -62,8 +62,8 @@ jobs:
       - name: Build and push image to Docker Hub
         uses: docker/build-push-action@v6
         with:
-          context: order-service
+          context: notification-service
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/order-service:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/notification-service:latest
 
 

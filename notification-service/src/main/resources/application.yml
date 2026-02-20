@@ -25,6 +25,6 @@ spring:
           writetimeout: 5000
 
 
-#kafka:
-#  topics:
-#    order: order-notifications
+kafka:
+  topics:
+    order: order-notifications

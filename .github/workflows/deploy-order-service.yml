@@ -2,7 +2,7 @@ name: Deploy order-service to EC2
 
 on:
   workflow_run:
-    workflows: ["build, test and push to docker order-service"]
+    workflows: ["build order-service"]
     types:
       - completed
 
