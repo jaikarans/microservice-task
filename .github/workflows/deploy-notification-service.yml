@@ -31,30 +31,21 @@ jobs:
               echo -e "\e[32mDocker already installed\e[0m"
             fi
             
-            #----- Prevent docker to run only with sudo -----
-            if ! id -nG "$USER" | grep -qw docker; then
-              echo -e "\e[32mAdding docker to user group\e[0m"
-              sudo usermod -aG docker $USER
-              newgrp docker
-            else
-              echo -e "\e[32mDocker is already added to user group on ec2\e[0m"
-            fi
-            
             
             echo -e "\e[32mLogin to the Docker Hub...\e[0m"
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             
             echo -e "\e[32mDownloading the user-service image from DockerHub...\e[0m"
-            docker pull ${{ secrets.DOCKER_USERNAME }}/notification-service:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/notification-service:latest
             
             echo -e "\e[32mStoping and Removing previous Image...\e[0m"
-            docker stop notification-service || true
-            docker rm notification-service || true
+            sudo docker stop notification-service || true
+            sudo docker rm notification-service || true
             
             echo -e "\e[32mRDS user-db values are exporting to user-service\e[0m"
             
             echo -e "\e[32mRunning the user-service...\e[0m"
-            docker run -d \
+            sudo docker run -d \
               -e SPRING_KAFKA_BOOTSTRAP_SERVERS=${{ secrets.EC2_KAFKA_PRIVATE_IP }}:9092 \
               -e 'SPRING_KAFKA_STREAMS_DEFAULT_KEY_SERDE=org.apache.kafka.common.serialization.Serdes$$StringSerde' \
               -e 'SPRING_KAFKA_STREAMS_DEFAULT_VALUE_SERDE=org.apache.kafka.common.serialization.Serdes$$StringSerde' \
