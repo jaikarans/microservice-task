@@ -33,7 +33,7 @@ public class OrderService {
 
         System.out.println("orderServiceUrl: "+orderServiceUrl);
 
-        return restTemplate.postForEntity(orderServiceUrl+"/api/place-order", requestBody, PlaceOrderResponse.class).getBody();
+        return restTemplate.postForEntity("http//"+orderServiceUrl+"/api/place-order", requestBody, PlaceOrderResponse.class).getBody();
 
     }
 }
